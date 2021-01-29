@@ -1,0 +1,4 @@
+include README.md
+recursive-include octoprint_twitchstreamer/templates *
+recursive-include octoprint_twitchstreamer/translations *
+recursive-include octoprint_twitchstreamer/static *

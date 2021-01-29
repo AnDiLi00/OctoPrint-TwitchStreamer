@@ -1,0 +1,72 @@
+<h3>TwitchStreamer Settings</h3>
+
+<form class="form-horizontal" onsubmit="return false;">
+    <div class="control-group">
+        <label class="control-label">{{ _('Folder') }}</label>
+        <div class="controls">
+            <div class="input-append input-block-level">
+                <input type="text" data-bind="value: settings.plugins.twitchstreamer.folder"/>
+            </div>
+        </div>
+    </div>
+
+    <div class="control-group">
+        <label class="control-label">{{ _('Temperatures') }}</label>
+        <div class="controls">
+            <label>
+                <input type="checkbox" data-bind="checked: settings.plugins.twitchstreamer.temperature_show"/>{{ _('Show ') }}
+            </label>
+            <div class="input-append">
+                <label>{{ _('Position [X, Y]') }}
+                    <input type="number" min="0" class="input-mini text-right" data-bind="value: settings.plugins.twitchstreamer.temperature_x">
+                    <span class="add-on">px</span>
+                    <input type="number" min="0" class="input-mini text-right" data-bind="value: settings.plugins.twitchstreamer.temperature_y">
+                    <span class="add-on">px</span>
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <div class="control-group">
+        <label class="control-label">{{ _('Printer Status') }}</label>
+        <div class="controls">
+            <label>
+                <input type="checkbox" data-bind="checked: settings.plugins.twitchstreamer.status_show"/>{{ _('Show ') }}
+            </label>
+            <div class="input-append">
+                <label>{{ _('Position [X, Y]') }}
+                    <input type="number" min="0" class="input-mini text-right" data-bind="value: settings.plugins.twitchstreamer.status_x">
+                    <span class="add-on">px</span>
+                    <input type="number" min="0" class="input-mini text-right" data-bind="value: settings.plugins.twitchstreamer.status_y">
+                    <span class="add-on">px</span>
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <div class="control-group">
+        <label class="control-label">{{ _('Overlay Graphic') }}</label>
+        <div class="controls">
+            <label>
+                <input type="checkbox" data-bind="checked: settings.plugins.twitchstreamer.graphic_show"/>{{ _('Show ') }}
+            </label>
+            <div class="input-append">
+                <label>{{ _('Position [X, Y]') }}
+                    <input type="number" min="0" class="input-mini text-right" data-bind="value: settings.plugins.twitchstreamer.graphic_x">
+                    <span class="add-on">px</span>
+                    <input type="number" min="0" class="input-mini text-right" data-bind="value: settings.plugins.twitchstreamer.graphic_y">
+                    <span class="add-on">px</span>
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <div class="control-group">
+        <label class="control-label">{{ _('Twitch Key') }}</label>
+        <div class="controls">
+            <div class="input-append input-block-level">
+                <input type="text" data-bind="value: settings.plugins.twitchstreamer.twitch_key"/>
+            </div>
+        </div>
+    </div>
+</form>
