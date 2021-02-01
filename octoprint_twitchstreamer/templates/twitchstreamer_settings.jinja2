@@ -58,6 +58,18 @@
                     <span class="add-on">px</span>
                 </label>
             </div>
+            <label>{{ _('File') }}
+                <input type="text" data-bind="value: settings.plugins.twitchstreamer.graphic_file"/>
+            </label>
+        </div>
+    </div>
+
+    <div class="control-group">
+        <label class="control-label">{{ _('Webcam Path') }}</label>
+        <div class="controls">
+            <div class="input-append input-block-level">
+                <input type="text" data-bind="value: settings.plugins.twitchstreamer.webcam_path"/>
+            </div>
         </div>
     </div>
 
@@ -67,6 +79,29 @@
             <div class="input-append input-block-level">
                 <input type="text" data-bind="value: settings.plugins.twitchstreamer.twitch_key"/>
             </div>
+        </div>
+    </div>
+
+    <div class="control-group">
+        <label class="control-label">{{ _('Quality') }}</label>
+        <div class="controls">
+            <label>{{ _('Encoding') }}
+                <select data-bind="value: settings.plugins.twitchstreamer.quality,
+                    options: [{name:'ultrafast'},
+                              {name:'superfast'},
+                              {name:'veryfast'},
+                              {name:'faster'},
+                              {name:'fast'},
+                              {name:'medium'},
+                              {name:'slow'},
+                              {name:'slower'},
+                              {name:'veryslow'}],
+                    optionsValue: 'name', optionsText: 'name'"></select>
+            </label>
+            <label>{{ _('Bitrate') }}
+                <input type="number" min="1" class="input-mini text-right" data-bind="value: settings.plugins.twitchstreamer.bitrate">
+                <span class="add-on">k</span>
+            </label>
         </div>
     </div>
 </form>

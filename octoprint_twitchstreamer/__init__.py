@@ -2,6 +2,7 @@
 from __future__ import absolute_import
 
 import os
+import subprocess
 
 import octoprint.plugin
 from octoprint.util import RepeatedTimer
@@ -29,7 +30,11 @@ class TwitchstreamerPlugin(octoprint.plugin.SettingsPlugin,
 	graphic_y = 0
 	graphic_file = ""
 
+	webcam_path = ""
 	twitch_key = ""
+
+	quality = ""
+	bitrate = ""
 
 	timer = None
 
@@ -48,18 +53,49 @@ class TwitchstreamerPlugin(octoprint.plugin.SettingsPlugin,
 			graphic_x=0,
 			graphic_y=0,
 			graphic_file="overlay.png",
-			twitch_key=""
+			webcam_path="http://10.11.5.109/webcam/?action=stream",
+			twitch_key="",
+			quality="veryslow",
+			bitrate="1000"
 		)
 
 	def on_settings_save(self, data):
 		octoprint.plugin.SettingsPlugin.on_settings_save(self, data)
 
-		self.check(self._settings.get(["folder"]))
+		self.check(self._settings.get(["folder"]),
+				   self._settings.get(["temperature_show"]),
+				   self._settings.get(["temperature_x"]),
+				   self._settings.get(["temperature_y"]),
+				   self._settings.get(["status_show"]),
+				   self._settings.get(["status_x"]),
+				   self._settings.get(["status_y"]),
+				   self._settings.get(["graphic_show"]),
+				   self._settings.get(["graphic_x"]),
+				   self._settings.get(["graphic_y"]),
+				   self._settings.get(["graphic_file"]),
+				   self._settings.get(["webcam_path"]),
+				   self._settings.get(["twitch_key"]),
+				   self._settings.get(["quality"]),
+				   self._settings.get(["bitrate"]))
 
 	##~~ StartupPlugin mixin
 
 	def on_after_startup(self):
-		self.check(self._settings.get(["folder"]))
+		self.check(self._settings.get(["folder"]),
+				   self._settings.get(["temperature_show"]),
+				   self._settings.get(["temperature_x"]),
+				   self._settings.get(["temperature_y"]),
+				   self._settings.get(["status_show"]),
+				   self._settings.get(["status_x"]),
+				   self._settings.get(["status_y"]),
+				   self._settings.get(["graphic_show"]),
+				   self._settings.get(["graphic_x"]),
+				   self._settings.get(["graphic_y"]),
+				   self._settings.get(["graphic_file"]),
+				   self._settings.get(["webcam_path"]),
+				   self._settings.get(["twitch_key"]),
+				   self._settings.get(["quality"]),
+				   self._settings.get(["bitrate"]))
 
 	##~~ TemplatePlugin mixin
 
@@ -80,8 +116,31 @@ class TwitchstreamerPlugin(octoprint.plugin.SettingsPlugin,
 			  new_graphic_x,
 			  new_graphic_y,
 			  new_graphic_file,
-			  new_twitch_key):
+			  new_webcam_path,
+			  new_twitch_key,
+			  new_quality,
+			  new_bitrate):
 		changed = False
+
+		self._logger.info("current settings:")
+		self._logger.info("-- folder={}".format(new_folder))
+		self._logger.info("-- temperature")
+		self._logger.info("-- -- show={}".format(new_temp))
+		self._logger.info("-- -- x={}".format(new_temp_x))
+		self._logger.info("-- -- y={}".format(new_temp_y))
+		self._logger.info("-- status")
+		self._logger.info("-- -- show={}".format(new_status))
+		self._logger.info("-- -- x={}".format(new_status_x))
+		self._logger.info("-- -- y={}".format(new_status_y))
+		self._logger.info("-- graphic")
+		self._logger.info("-- -- show={}".format(new_graphic))
+		self._logger.info("-- -- x={}".format(new_graphic_x))
+		self._logger.info("-- -- y={}".format(new_graphic_y))
+		self._logger.info("-- -- file={}".format(new_graphic_file))
+		self._logger.info("-- webcam={}".format(new_webcam_path))
+		self._logger.info("-- twitchkey={}".format(new_twitch_key))
+		self._logger.info("-- quality={}".format(new_quality))
+		self._logger.info("-- bitrate={}".format(new_bitrate))
 
 		if self.folder != new_folder:
 			try:
@@ -89,7 +148,7 @@ class TwitchstreamerPlugin(octoprint.plugin.SettingsPlugin,
 				self.folder = new_folder
 				changed = True
 			except OSError as error:
-				self._logger.error("directory {new_folder} couldn't be created".format(**locals()))
+				self._logger.error("directory {} couldn't be created".format(new_folder))
 
 		if self.temperature_show != new_temp:
 			self.temperature_show = new_temp
@@ -131,8 +190,20 @@ class TwitchstreamerPlugin(octoprint.plugin.SettingsPlugin,
 			self.graphic_file = new_graphic_file
 			changed = True
 
+		if self.webcam_path != new_webcam_path:
+			self.webcam_path = new_webcam_path
+			changed = True
+
 		if self.twitch_key != new_twitch_key:
 			self.twitch_key = new_twitch_key
+			changed = True
+
+		if self.quality != new_quality:
+			self.quality = new_quality
+			changed = True
+
+		if self.bitrate != new_bitrate:
+			self.bitrate = new_bitrate
 			changed = True
 
 		if changed:
@@ -242,13 +313,65 @@ class TwitchstreamerPlugin(octoprint.plugin.SettingsPlugin,
 					else:
 						float_percent = 100.0 * float(print_time / (print_time_left + print_time))
 
-						write_data += "percent: "
-						write_data += str("{:.1f}".format(float_percent))
-						write_data += "\%"
+						write_data += "percent: {:.1f}\%".format(float_percent)
 			else:
 				write_data = "\n\n\n\n" + write_data
 
 		self.touch(self.folder, self.status_file, write_data)
+
+	def start_stream(self):
+		command = "ffmpeg -i {webcam_path} -i {overlay} "
+
+		if self.temperature_show or self.status_show or self.graphic_show:
+			command += "-filter_complex \"[0:v]"
+
+		if self.temperature_show:
+			command += "drawtext=fontfile={font}:textfile={temp_file}:x={temp_x}:y={temp_y}:reload=1:fontcolor=white:fontsize={font_size}[vtxt1]"
+			if self.status_show or self.graphic_show:
+				command += ";[vtxt1]"
+
+		if self.status_show:
+			command += "drawtext=fontfile={font}:textfile={status_file}:x={status_x}:y={status_y}:reload=1:fontcolor=white:fontsize={font_size}[vtxt2]"
+			if self.graphic_show:
+				command += ";[vtxt2]"
+
+		if self.graphic_show:
+			command += "[1:v]overlay=x={overlay_x}:y={overlay_y}[out]\" "
+		elif self.temperature_show or self.status_show:
+			command += "\" "
+
+		command += "-vcodec libx264 -pix_fmt yuv420p -preset {quality} -g 20 -b:v {bitrate}k -threads 0 -bufsize 512k "
+		command += "-map \""
+
+		if self.graphic_show:
+			command += "[out]"
+		elif self.status_show:
+			command += "[vtxt2]"
+		elif self.temperature_show:
+			command += "[vtxt2]"
+		else:
+			command += "[0:v]"
+
+		command += "\" -f flv rtmp://live.twitch.tv/app/{twitch_key}"
+		command.format(webcam_path=self.webcam_path,
+					   twitch_key=self.twitch_key,
+					   font=self.font,
+					   font_size=self.font_size,
+					   temp_file=self.temperature_file,
+					   temp_x=self.temperature_x,
+					   temp_y=self.temperature_y,
+					   status_file=self.status_file,
+					   status_x=self.status_x,
+					   status_y=self.status_y,
+					   overlay=self.graphic_file,
+					   overlay_x=self.graphic_x,
+					   overlay_y=self.graphic_y,
+					   quality=self.quality,
+					   bitrate=self.bitrate)
+
+		subprocess.call(command, shell=True)
+
+		self._logger.info("command={}".format(command))
 
 	@staticmethod
 	def touch(path, filename, data):
@@ -267,11 +390,11 @@ class TwitchstreamerPlugin(octoprint.plugin.SettingsPlugin,
 		seconds = seconds - days * 86400 - hours * 3600 - minutes * 60
 
 		if days > 0:
-			result = "{}d".format(days) + "{}h".format(hours) + "{}m".format(minutes) + "{}s".format(seconds)
+			result = "{}d{}h{}m{}s".format(days, hours, minutes, seconds)
 		elif hours > 0:
-			result = "{}h".format(hours) + "{}m".format(minutes) + "{}s".format(seconds)
+			result = "{}h{}m{}s".format(hours, minutes, seconds)
 		elif minutes > 0:
-			result = "{}m".format(minutes) + "{}s".format(seconds)
+			result = "{}m{}s".format(minutes, seconds)
 		elif seconds >= 0:
 			result = "{}s".format(seconds)
 
