@@ -5,12 +5,15 @@ import os
 import subprocess
 
 import octoprint.plugin
+from octoprint.events import Events
 from octoprint.util import RepeatedTimer
+from octoprint.util import ResettableTimer
 
 
 class TwitchstreamerPlugin(octoprint.plugin.SettingsPlugin,
 						   octoprint.plugin.StartupPlugin,
-						   octoprint.plugin.TemplatePlugin):
+						   octoprint.plugin.TemplatePlugin,
+						   octoprint.plugin.EventHandlerPlugin):
 	folder = ""
 
 	temperature_show = False
@@ -37,6 +40,9 @@ class TwitchstreamerPlugin(octoprint.plugin.SettingsPlugin,
 	bitrate = ""
 
 	timer = None
+	end_timer = None
+
+	process = None
 
 	##~~ SettingsPlugin mixin
 
@@ -101,6 +107,14 @@ class TwitchstreamerPlugin(octoprint.plugin.SettingsPlugin,
 
 	def get_template_configs(self):
 		return [{"type": "settings", "custom_bindings": False}]
+
+	##~~ EventHandlerPlugin mixin
+
+	def on_event(self, event, payload):
+		if event == Events.PRINT_STARTED:
+			self.print_started()
+		elif event == Events.PRINT_DONE or event == Events.PRINT_FAILED:
+			self.print_ended()
 
 	##~~ Class specific
 
@@ -369,9 +383,29 @@ class TwitchstreamerPlugin(octoprint.plugin.SettingsPlugin,
 					   quality=self.quality,
 					   bitrate=self.bitrate)
 
-		subprocess.call(command, shell=True)
+		self.process = subprocess.Popen(command, shell=True)
 
 		self._logger.info("command={}".format(command))
+
+	def end_stream(self):
+		self.process.terminate()
+		self.process = None
+
+	def start_print(self):
+		if self.end_timer != None:
+			self.end_timer.cancel()
+
+		if self.process != None:
+			self.end_stream()
+
+		self.start_stream()
+
+	def print_ended(self):
+		if self.end_timer == None:
+			self.end_timer = ResettableTimer(120.0, self.end_stream)
+
+		self.end_timer.reset()
+		self.end_timer.start()
 
 	@staticmethod
 	def touch(path, filename, data):
