@@ -360,27 +360,31 @@ class TwitchstreamerPlugin(octoprint.plugin.SettingsPlugin,
 		self.touch(self.folder, self.status_file, write_data)
 
 	def stream_start(self):
-		command = "ffmpeg -i {webcam_path} -i {overlay} "
+		filepath_temperature = self.folder + self.temperature_file
+		filepath_status = self.folder + self.status_file
+		filepath_graphic = self.folder + self.graphic_file
+
+		command = "ffmpeg -i {self.webcam_path} -i {filepath_graphic} "
 
 		if self.temperature_show or self.status_show or self.graphic_show:
 			command += "-filter_complex \"[0:v]"
 
 		if self.temperature_show:
-			command += "drawtext=fontfile={font}:textfile={temp_file}:x={temp_x}:y={temp_y}:reload=1:fontcolor=white:fontsize={font_size}[vtxt1]"
+			command += "drawtext=fontfile={self.font}:textfile={filepath_temperature}:x={self.temperature_x}:y={self.temperature_y}:reload=1:fontcolor=white:fontsize={self.font_size}[vtxt1]"
 			if self.status_show or self.graphic_show:
 				command += ";[vtxt1]"
 
 		if self.status_show:
-			command += "drawtext=fontfile={font}:textfile={status_file}:x={status_x}:y={status_y}:reload=1:fontcolor=white:fontsize={font_size}[vtxt2]"
+			command += "drawtext=fontfile={self.font}:textfile={filepath_status}:x={self.status_x}:y={self.status_y}:reload=1:fontcolor=white:fontsize={self.font_size}[vtxt2]"
 			if self.graphic_show:
 				command += ";[vtxt2]"
 
 		if self.graphic_show:
-			command += "[1:v]overlay=x={overlay_x}:y={overlay_y}[out]\" "
+			command += "[1:v]overlay=x={self.graphic_x}:y={self.graphic_y}[out]\" "
 		elif self.temperature_show or self.status_show:
 			command += "\" "
 
-		command += "-vcodec libx264 -pix_fmt yuv420p -preset {quality} -g 20 -b:v {bitrate}k -threads 0 -bufsize 512k "
+		command += "-vcodec libx264 -pix_fmt yuv420p -preset {self.quality} -g 20 -b:v {self.bitrate}k -threads 0 -bufsize 512k "
 		command += "-map \""
 
 		if self.graphic_show:
@@ -392,43 +396,28 @@ class TwitchstreamerPlugin(octoprint.plugin.SettingsPlugin,
 		else:
 			command += "[0:v]"
 
-		command += "\" -f flv rtmp://live.twitch.tv/app/{twitch_key}"
+		command += "\" -f flv rtmp://live.twitch.tv/app/{self.twitch_key}"
+		formated_command = command.format(**locals())
 
-		filepath_temperature = self.folder + self.temperature_file
-		filepath_status = self.folder + self.status_file
-		filepath_graphic = self.folder + self.graphic_file
+		self.process = subprocess.Popen(formated_command, shell=True)
 
-		command.format(webcam_path=self.webcam_path,
-					   twitch_key=self.twitch_key,
-					   font=self.font,
-					   font_size=self.font_size,
-					   temp_file=filepath_temperature,
-					   temp_x=self.temperature_x,
-					   temp_y=self.temperature_y,
-					   status_file=filepath_status,
-					   status_x=self.status_x,
-					   status_y=self.status_y,
-					   overlay=filepath_graphic,
-					   overlay_x=self.graphic_x,
-					   overlay_y=self.graphic_y,
-					   quality=self.quality,
-					   bitrate=self.bitrate)
-
-		self.process = subprocess.Popen(command, shell=True)
-
-		self._logger.info("command={}".format(command))
+		self._logger.info("stream start - command={}".format(formated_command))
 
 	def stream_end(self):
-		self.process.terminate()
-		self.process = None
+		if self.process != None:
+			self.process.terminate()
+			self.process = None
+
+			self._logger.info("stream end")
 
 	def print_start(self):
+		self._logger.info("print start")
+
 		self.streaming = True
 
 		self.start_timer()
 
-		if self.process != None:
-			self.stream_end()
+		self.stream_end()
 
 		if self.end_timer != None:
 			self.end_timer.cancel()
@@ -436,6 +425,8 @@ class TwitchstreamerPlugin(octoprint.plugin.SettingsPlugin,
 		self.stream_start()
 
 	def print_end(self):
+		self._logger.info("print end")
+
 		self.streaming = False
 
 		self.stop_timer()
