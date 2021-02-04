@@ -65,9 +65,9 @@ class TwitchstreamerPlugin(octoprint.plugin.SettingsPlugin,
 			graphic_file="overlay.png",
 			webcam_path="http://octopi.local/webcam/?action=stream",
 			twitch_key="",
-			quality="veryslow",
+			quality="medium",
 			bitrate="1000",
-			font="/usr/share/fonts/truetype/liberation/LiberationMono-Regular.ttf",
+			font="/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf",
 			font_size=18
 		)
 
