@@ -39,10 +39,14 @@ class TwitchstreamerPlugin(octoprint.plugin.SettingsPlugin,
 	quality = ""
 	bitrate = ""
 
+	font = ""
+	font_size = 0
+
 	timer = None
 	end_timer = None
 
 	process = None
+	streaming = False
 
 	##~~ SettingsPlugin mixin
 
@@ -62,7 +66,9 @@ class TwitchstreamerPlugin(octoprint.plugin.SettingsPlugin,
 			webcam_path="http://octopi.local/webcam/?action=stream",
 			twitch_key="",
 			quality="veryslow",
-			bitrate="1000"
+			bitrate="1000",
+			font="/usr/share/fonts/truetype/liberation/LiberationMono-Regular.ttf",
+			font_size=18
 		)
 
 	def on_settings_save(self, data):
@@ -82,7 +88,9 @@ class TwitchstreamerPlugin(octoprint.plugin.SettingsPlugin,
 				   self._settings.get(["webcam_path"]),
 				   self._settings.get(["twitch_key"]),
 				   self._settings.get(["quality"]),
-				   self._settings.get(["bitrate"]))
+				   self._settings.get(["bitrate"]),
+				   self._settings.get(["font"]),
+				   self._settings.get(["font_size"]))
 
 	##~~ StartupPlugin mixin
 
@@ -101,7 +109,9 @@ class TwitchstreamerPlugin(octoprint.plugin.SettingsPlugin,
 				   self._settings.get(["webcam_path"]),
 				   self._settings.get(["twitch_key"]),
 				   self._settings.get(["quality"]),
-				   self._settings.get(["bitrate"]))
+				   self._settings.get(["bitrate"]),
+				   self._settings.get(["font"]),
+				   self._settings.get(["font_size"]))
 
 	##~~ TemplatePlugin mixin
 
@@ -112,9 +122,9 @@ class TwitchstreamerPlugin(octoprint.plugin.SettingsPlugin,
 
 	def on_event(self, event, payload):
 		if event == Events.PRINT_STARTED:
-			self.print_started()
+			self.print_start()
 		elif event == Events.PRINT_DONE or event == Events.PRINT_FAILED:
-			self.print_ended()
+			self.print_end()
 
 	##~~ Class specific
 
@@ -133,7 +143,9 @@ class TwitchstreamerPlugin(octoprint.plugin.SettingsPlugin,
 			  new_webcam_path,
 			  new_twitch_key,
 			  new_quality,
-			  new_bitrate):
+			  new_bitrate,
+			  new_font,
+			  new_font_size):
 		changed = False
 
 		self._logger.info("current settings:")
@@ -155,6 +167,8 @@ class TwitchstreamerPlugin(octoprint.plugin.SettingsPlugin,
 		self._logger.info("-- twitchkey={}".format(new_twitch_key))
 		self._logger.info("-- quality={}".format(new_quality))
 		self._logger.info("-- bitrate={}".format(new_bitrate))
+		self._logger.info("-- font={}".format(new_font))
+		self._logger.info("-- font size={}".format(new_font_size))
 
 		if self.folder != new_folder:
 			try:
@@ -220,16 +234,28 @@ class TwitchstreamerPlugin(octoprint.plugin.SettingsPlugin,
 			self.bitrate = new_bitrate
 			changed = True
 
+		if self.font != new_font:
+			self.font = new_font
+			changed = True
+
+		if self.font_size != new_font_size:
+			self.font_size = new_font_size
+			changed = True
+
 		if changed:
-			self.start_timer()
+			if self.streaming:
+				self.print_start()
 
 	def start_timer(self):
-		if self.timer:
-			self.timer.cancel()
-			self.timer = None
+		self.stop_timer()
 
 		self.timer = RepeatedTimer(5.0, self.update_values, run_first=True)
 		self.timer.start()
+
+	def stop_timer(self):
+		if self.timer:
+			self.timer.cancel()
+			self.timer = None
 
 	def update_values(self):
 		self.status_data = self._printer.get_current_data()
@@ -333,7 +359,7 @@ class TwitchstreamerPlugin(octoprint.plugin.SettingsPlugin,
 
 		self.touch(self.folder, self.status_file, write_data)
 
-	def start_stream(self):
+	def stream_start(self):
 		command = "ffmpeg -i {webcam_path} -i {overlay} "
 
 		if self.temperature_show or self.status_show or self.graphic_show:
@@ -392,22 +418,30 @@ class TwitchstreamerPlugin(octoprint.plugin.SettingsPlugin,
 
 		self._logger.info("command={}".format(command))
 
-	def end_stream(self):
+	def stream_end(self):
 		self.process.terminate()
 		self.process = None
 
-	def start_print(self):
+	def print_start(self):
+		self.streaming = True
+
+		self.start_timer()
+
+		if self.process != None:
+			self.stream_end()
+
 		if self.end_timer != None:
 			self.end_timer.cancel()
 
-		if self.process != None:
-			self.end_stream()
+		self.stream_start()
 
-		self.start_stream()
+	def print_end(self):
+		self.streaming = False
 
-	def print_ended(self):
+		self.stop_timer()
+
 		if self.end_timer == None:
-			self.end_timer = ResettableTimer(120.0, self.end_stream)
+			self.end_timer = ResettableTimer(120.0, self.stream_end)
 
 		self.end_timer.reset()
 		self.end_timer.start()

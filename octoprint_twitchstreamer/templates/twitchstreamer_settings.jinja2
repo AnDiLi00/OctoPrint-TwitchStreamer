@@ -4,62 +4,79 @@
     <div class="control-group">
         <label class="control-label">{{ _('Folder') }}</label>
         <div class="controls">
-            <div class="input-append input-block-level">
-                <input type="text" data-bind="value: settings.plugins.twitchstreamer.folder"/>
-            </div>
+            <input type="text" class="input-block-level" data-bind="value: settings.plugins.twitchstreamer.folder"/>
         </div>
     </div>
 
     <div class="control-group">
         <label class="control-label">{{ _('Temperatures') }}</label>
         <div class="controls">
-            <label>
+            <label class="checkbox">
                 <input type="checkbox" data-bind="checked: settings.plugins.twitchstreamer.temperature_show"/>{{ _('Show ') }}
             </label>
-            <div class="input-append">
-                <label>{{ _('Position [X, Y]') }}
+            <label>{{ _('Position [X, Y]') }}
+                <div class="input-append">
                     <input type="number" min="0" class="input-mini text-right" data-bind="value: settings.plugins.twitchstreamer.temperature_x">
                     <span class="add-on">px</span>
+                </div>
+                <div class="input-append">
                     <input type="number" min="0" class="input-mini text-right" data-bind="value: settings.plugins.twitchstreamer.temperature_y">
                     <span class="add-on">px</span>
-                </label>
-            </div>
+                </div>
+            </label>
         </div>
     </div>
 
     <div class="control-group">
         <label class="control-label">{{ _('Printer Status') }}</label>
         <div class="controls">
-            <label>
+            <label class="checkbox">
                 <input type="checkbox" data-bind="checked: settings.plugins.twitchstreamer.status_show"/>{{ _('Show ') }}
             </label>
-            <div class="input-append">
-                <label>{{ _('Position [X, Y]') }}
+            <label>{{ _('Position [X, Y]') }}
+                <div class="input-append">
                     <input type="number" min="0" class="input-mini text-right" data-bind="value: settings.plugins.twitchstreamer.status_x">
                     <span class="add-on">px</span>
+                </div>
+                <div class="input-append">
                     <input type="number" min="0" class="input-mini text-right" data-bind="value: settings.plugins.twitchstreamer.status_y">
                     <span class="add-on">px</span>
-                </label>
-            </div>
+                </div>
+            </label>
         </div>
     </div>
 
     <div class="control-group">
         <label class="control-label">{{ _('Overlay Graphic') }}</label>
         <div class="controls">
-            <label>
+            <label class="checkbox">
                 <input type="checkbox" data-bind="checked: settings.plugins.twitchstreamer.graphic_show"/>{{ _('Show ') }}
             </label>
-            <div class="input-append">
-                <label>{{ _('Position [X, Y]') }}
+            <label>{{ _('Position [X, Y]') }}
+                <div class="input-append">
                     <input type="number" min="0" class="input-mini text-right" data-bind="value: settings.plugins.twitchstreamer.graphic_x">
                     <span class="add-on">px</span>
+                </div>
+                <div class="input-append">
                     <input type="number" min="0" class="input-mini text-right" data-bind="value: settings.plugins.twitchstreamer.graphic_y">
                     <span class="add-on">px</span>
-                </label>
-            </div>
+                </div>
+            </label>
             <label>{{ _('File') }}
-                <input type="text" data-bind="value: settings.plugins.twitchstreamer.graphic_file"/>
+                <input type="text" class="input-block-level" data-bind="value: settings.plugins.twitchstreamer.graphic_file"/>
+            </label>
+        </div>
+    </div>
+
+    <div class="control-group">
+        <label class="control-label">{{ _('Font') }}</label>
+        <div class="controls">
+            <input type="text" class="input-block-level" data-bind="value: settings.plugins.twitchstreamer.font"/>
+            <label>{{ _('Size') }}
+                <div class="input-append">
+                    <input type="number" min="1" class="input-mini text-right" data-bind="value: settings.plugins.twitchstreamer.font_size">
+                    <span class="add-on">pt</span>
+                </div>
             </label>
         </div>
     </div>
@@ -67,18 +84,14 @@
     <div class="control-group">
         <label class="control-label">{{ _('Webcam Path') }}</label>
         <div class="controls">
-            <div class="input-append input-block-level">
-                <input type="text" data-bind="value: settings.plugins.twitchstreamer.webcam_path"/>
-            </div>
+            <input type="text" class="input-block-level" data-bind="value: settings.plugins.twitchstreamer.webcam_path"/>
         </div>
     </div>
 
     <div class="control-group">
         <label class="control-label">{{ _('Twitch Key') }}</label>
         <div class="controls">
-            <div class="input-append input-block-level">
-                <input type="text" data-bind="value: settings.plugins.twitchstreamer.twitch_key"/>
-            </div>
+            <input type="text" class="input-block-level" data-bind="value: settings.plugins.twitchstreamer.twitch_key"/>
         </div>
     </div>
 
@@ -96,11 +109,14 @@
                               {name:'slow'},
                               {name:'slower'},
                               {name:'veryslow'}],
-                    optionsValue: 'name', optionsText: 'name'"></select>
+                    optionsValue: 'name', optionsText: 'name'">
+                </select>
             </label>
             <label>{{ _('Bitrate') }}
-                <input type="number" min="1" class="input-mini text-right" data-bind="value: settings.plugins.twitchstreamer.bitrate">
-                <span class="add-on">k</span>
+                <div class="input-append">
+                    <input type="number" min="1" class="input-mini text-right" data-bind="value: settings.plugins.twitchstreamer.bitrate">
+                    <span class="add-on">k</span>
+                </div>
             </label>
         </div>
     </div>
