@@ -48,7 +48,7 @@ class TwitchstreamerPlugin(octoprint.plugin.SettingsPlugin,
 
 	def get_settings_defaults(self):
 		return dict(
-			folder="~/twitchstreamer/",
+			folder="/home/pi/twitchstreamer/",
 			temperature_show=True,
 			temperature_x=911,
 			temperature_y=680,
@@ -59,7 +59,7 @@ class TwitchstreamerPlugin(octoprint.plugin.SettingsPlugin,
 			graphic_x=0,
 			graphic_y=0,
 			graphic_file="overlay.png",
-			webcam_path="http://10.11.5.109/webcam/?action=stream",
+			webcam_path="http://octopi.local/webcam/?action=stream",
 			twitch_key="",
 			quality="veryslow",
 			bitrate="1000"
@@ -367,17 +367,22 @@ class TwitchstreamerPlugin(octoprint.plugin.SettingsPlugin,
 			command += "[0:v]"
 
 		command += "\" -f flv rtmp://live.twitch.tv/app/{twitch_key}"
+
+		filepath_temperature = self.folder + self.temperature_file
+		filepath_status = self.folder + self.status_file
+		filepath_graphic = self.folder + self.graphic_file
+
 		command.format(webcam_path=self.webcam_path,
 					   twitch_key=self.twitch_key,
 					   font=self.font,
 					   font_size=self.font_size,
-					   temp_file=self.temperature_file,
+					   temp_file=filepath_temperature,
 					   temp_x=self.temperature_x,
 					   temp_y=self.temperature_y,
-					   status_file=self.status_file,
+					   status_file=filepath_status,
 					   status_x=self.status_x,
 					   status_y=self.status_y,
-					   overlay=self.graphic_file,
+					   overlay=filepath_graphic,
 					   overlay_x=self.graphic_x,
 					   overlay_y=self.graphic_y,
 					   quality=self.quality,
