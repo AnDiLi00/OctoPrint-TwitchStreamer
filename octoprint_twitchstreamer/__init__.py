@@ -122,9 +122,14 @@ class TwitchstreamerPlugin(octoprint.plugin.SettingsPlugin,
 
 	def on_event(self, event, payload):
 		if event == Events.PRINT_STARTED:
+			self._logger.info("received event PRINT STARTED")
 			self.print_start()
-		elif event == Events.PRINT_DONE or event == Events.PRINT_FAILED:
-			self.print_end()
+		elif event == Events.PRINT_FAILED:
+			self._logger.info("received event PRINT FAILED")
+			self.print_end(True)
+		elif event == Events.PRINT_DONE:
+			self._logger.info("received event PRINT DONE")
+			self.print_end(False)
 
 	##~~ Class specific
 
@@ -404,7 +409,7 @@ class TwitchstreamerPlugin(octoprint.plugin.SettingsPlugin,
 		self._logger.info("stream start - command={}".format(formated_command))
 
 	def stream_end(self):
-		if self.process != None:
+		if self.process:
 			self.process.terminate()
 			self.process = None
 
@@ -419,23 +424,26 @@ class TwitchstreamerPlugin(octoprint.plugin.SettingsPlugin,
 
 		self.stream_end()
 
-		if self.end_timer != None:
+		if self.end_timer:
 			self.end_timer.cancel()
 
 		self.stream_start()
 
-	def print_end(self):
-		self._logger.info("print end")
+	def print_end(self, forced):
+		self._logger.info("print end - forced={}".format(forced))
 
 		self.streaming = False
 
 		self.stop_timer()
 
-		if self.end_timer == None:
-			self.end_timer = ResettableTimer(120.0, self.stream_end)
-
-		self.end_timer.reset()
-		self.end_timer.start()
+		if forced:
+			self.stream_end()
+		else:
+			if self.end_timer:
+				self.end_timer.reset()
+			else:
+				self.end_timer = ResettableTimer(120.0, self.stream_end)
+				self.end_timer.start()
 
 	@staticmethod
 	def touch(path, filename, data):
