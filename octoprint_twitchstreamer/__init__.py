@@ -2,7 +2,7 @@
 from __future__ import absolute_import
 
 import os
-# import subprocess
+import subprocess
 
 import octoprint.plugin
 from octoprint.events import Events
@@ -386,7 +386,7 @@ class TwitchstreamerPlugin(octoprint.plugin.SettingsPlugin, octoprint.plugin.Sta
 		command += "\" -f flv rtmp://live.twitch.tv/app/{self.twitch_key}"
 
 		command_formated = command.format(**locals())
-		# self.process = subprocess.Popen(command_formated, stdout=subprocess.PIPE, shell=True)
+		self.process = subprocess.Popen(command_formated, stdout=subprocess.PIPE, shell=True)
 
 		self._logger.info("stream_start - command={}".format(command_formated))
 
