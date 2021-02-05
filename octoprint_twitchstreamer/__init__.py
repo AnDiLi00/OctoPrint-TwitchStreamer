@@ -132,15 +132,16 @@ class TwitchstreamerPlugin(octoprint.plugin.SettingsPlugin, octoprint.plugin.Sta
 
 	##~~ Class specific
 
-	def check_settings(self, new_folder, new_temp, new_temp_x, new_temp_y, new_status, new_status_x, new_status_y,
-					   new_graphic, new_graphic_x, new_graphic_y, new_graphic_file, new_webcam_path, new_twitch_key,
-					   new_quality, new_bitrate, new_font, new_font_size):
+	def check_settings(self, new_folder, new_temperature, new_temperature_x, new_temperature_y,
+					   new_status, new_status_x, new_status_y, new_graphic, new_graphic_x, new_graphic_y,
+					   new_graphic_file, new_webcam_path, new_twitch_key, new_quality, new_bitrate,
+					   new_font, new_font_size):
 		self._logger.info("check_settings - new settings")
 		self._logger.info("-- folder={}".format(new_folder))
 		self._logger.info("-- temperature")
-		self._logger.info("-- -- show={}".format(new_temp))
-		self._logger.info("-- -- x={}".format(new_temp_x))
-		self._logger.info("-- -- y={}".format(new_temp_y))
+		self._logger.info("-- -- show={}".format(new_temperature))
+		self._logger.info("-- -- x={}".format(new_temperature_x))
+		self._logger.info("-- -- y={}".format(new_temperature_y))
 		self._logger.info("-- status")
 		self._logger.info("-- -- show={}".format(new_status))
 		self._logger.info("-- -- x={}".format(new_status_x))
@@ -160,23 +161,23 @@ class TwitchstreamerPlugin(octoprint.plugin.SettingsPlugin, octoprint.plugin.Sta
 		changed = False
 
 		if self.folder != new_folder:
-			try:
-				os.makedirs(new_folder, exist_ok=True)
-				self.folder = new_folder
-				changed = True
-			except OSError as error:
-				self._logger.error("directory {} couldn't be created".format(new_folder))
+			self.remove_file(self.folder, self.temperature_file)
+			self.remove_file(self.folder, self.status_file)
+			self.remove_path(self.folder)
 
-		if self.temperature_show != new_temp:
-			self.temperature_show = new_temp
+			self.folder = new_folder
 			changed = True
 
-		if self.temperature_x != new_temp_x:
-			self.temperature_x = new_temp_x
+		if self.temperature_show != new_temperature:
+			self.temperature_show = new_temperature
 			changed = True
 
-		if self.temperature_y != new_temp_y:
-			self.temperature_y = new_temp_y
+		if self.temperature_x != new_temperature_x:
+			self.temperature_x = new_temperature_x
+			changed = True
+
+		if self.temperature_y != new_temperature_y:
+			self.temperature_y = new_temperature_y
 			changed = True
 
 		if self.status_show != new_status:
