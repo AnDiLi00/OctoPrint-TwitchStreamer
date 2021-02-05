@@ -121,14 +121,13 @@ class TwitchstreamerPlugin(octoprint.plugin.SettingsPlugin, octoprint.plugin.Sta
 	def on_event(self, event, payload):
 		if event == Events.PRINT_STARTED:
 			self._logger.info("on_event - Events.PRINT_STARTED")
-		# self.print_start()
+			self.print_start()
 		elif event == Events.PRINT_FAILED:
 			self._logger.info("on_event - Events.PRINT_FAILED")
-		# self.print_end(True)
+			self.print_end(True)
 		elif event == Events.PRINT_DONE:
 			self._logger.info("on_event - Events.PRINT_DONE")
-
-	# self.print_end(False)
+			self.print_end(False)
 
 	##~~ Class specific
 
