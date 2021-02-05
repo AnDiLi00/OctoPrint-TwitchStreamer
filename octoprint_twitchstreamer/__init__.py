@@ -60,7 +60,7 @@ class TwitchstreamerPlugin(octoprint.plugin.SettingsPlugin, octoprint.plugin.Sta
 			graphic_show=True,
 			graphic_x=1202,
 			graphic_y=640,
-			graphic_file="overlay.png",
+			graphic_file="/home/pi/twitchstreamer/overlay.png",
 			webcam_path="http://octopi.local/webcam/?action=stream",
 			twitch_key="",
 			quality="medium",
@@ -346,7 +346,7 @@ class TwitchstreamerPlugin(octoprint.plugin.SettingsPlugin, octoprint.plugin.Sta
 	def stream_start(self):
 		filepath_temperature = self.folder + self.temperature_file
 		filepath_status = self.folder + self.status_file
-		filepath_graphic = self.folder + self.graphic_file
+		filepath_graphic = self.graphic_file
 
 		command = "ffmpeg -i {self.webcam_path} -i {filepath_graphic} "
 
