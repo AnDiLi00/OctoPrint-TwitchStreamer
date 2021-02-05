@@ -2,7 +2,7 @@
 from __future__ import absolute_import
 
 import os
-import subprocess
+# import subprocess
 
 import octoprint.plugin
 from octoprint.events import Events
@@ -10,10 +10,8 @@ from octoprint.util import RepeatedTimer
 from octoprint.util import ResettableTimer
 
 
-class TwitchstreamerPlugin(octoprint.plugin.SettingsPlugin,
-						   octoprint.plugin.StartupPlugin,
-						   octoprint.plugin.TemplatePlugin,
-						   octoprint.plugin.EventHandlerPlugin):
+class TwitchstreamerPlugin(octoprint.plugin.SettingsPlugin, octoprint.plugin.StartupPlugin,
+						   octoprint.plugin.TemplatePlugin, octoprint.plugin.EventHandlerPlugin):
 	folder = ""
 
 	temperature_show = False
@@ -134,7 +132,9 @@ class TwitchstreamerPlugin(octoprint.plugin.SettingsPlugin,
 
 	##~~ Class specific
 
-	def check_settings(self, new_folder, new_temp, new_temp_x, new_temp_y, new_status, new_status_x, new_status_y, new_graphic, new_graphic_x, new_graphic_y, new_graphic_file, new_webcam_path, new_twitch_key, new_quality, new_bitrate, new_font, new_font_size):
+	def check_settings(self, new_folder, new_temp, new_temp_x, new_temp_y, new_status, new_status_x, new_status_y,
+					   new_graphic, new_graphic_x, new_graphic_y, new_graphic_file, new_webcam_path, new_twitch_key,
+					   new_quality, new_bitrate, new_font, new_font_size):
 		self._logger.info("check_settings - new settings")
 		self._logger.info("-- folder={}".format(new_folder))
 		self._logger.info("-- temperature")
@@ -269,7 +269,8 @@ class TwitchstreamerPlugin(octoprint.plugin.SettingsPlugin,
 				state_dict = self.status_data["state"]
 				flags_dict = state_dict["flags"]
 
-				if flags_dict["cancelling"] or flags_dict["finishing"] or flags_dict["paused"] or flags_dict["pausing"] or flags_dict["printing"]:
+				if flags_dict["cancelling"] or flags_dict["finishing"] or flags_dict["paused"] or flags_dict[
+					"pausing"] or flags_dict["printing"]:
 					printing_state = True
 
 				data += "state:   "
@@ -385,7 +386,7 @@ class TwitchstreamerPlugin(octoprint.plugin.SettingsPlugin,
 		command += "\" -f flv rtmp://live.twitch.tv/app/{self.twitch_key}"
 
 		command_formated = command.format(**locals())
-		#self.process = subprocess.Popen(command_formated, stdout=subprocess.PIPE, shell=True)
+		# self.process = subprocess.Popen(command_formated, stdout=subprocess.PIPE, shell=True)
 
 		self._logger.info("stream_start - command={}".format(command_formated))
 
