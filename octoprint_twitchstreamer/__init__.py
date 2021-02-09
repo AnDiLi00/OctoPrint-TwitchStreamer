@@ -2,7 +2,7 @@
 from __future__ import absolute_import
 
 import os
-import signal
+import shlex
 import subprocess
 
 import octoprint.plugin
@@ -388,7 +388,7 @@ class TwitchstreamerPlugin(octoprint.plugin.SettingsPlugin, octoprint.plugin.Sta
 
 		command_formated = command.format(**locals())
 		#self.process = subprocess.Popen(command_formated, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, preexec_fn=os.setsid)
-		self.process = subprocess.Popen(command_formated)
+		self.process = subprocess.Popen(shlex.split(command_formated))
 
 		self._logger.info("stream_start - command={}".format(command_formated))
 		self._logger.info("process id={}".format(self.process.pid))
