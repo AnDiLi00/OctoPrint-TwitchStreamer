@@ -393,7 +393,6 @@ class TwitchstreamerPlugin(octoprint.plugin.SettingsPlugin, octoprint.plugin.Sta
 
 	def stream_end(self):
 		if self.process:
-			#os.killpg(os.getpgid(self.process.pid), signal.SIGTERM)
 			self.process.terminate()
 			self.process = None
 
